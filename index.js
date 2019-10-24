@@ -1,72 +1,97 @@
-//importing modules
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyparser = require('body-parser');
-const cors = require('cors');
-const path = require('path');
-
+//for validation of schema we will use Joi class
+const Joi = require('joi');
 const app = express();
 
-//calling router js
-const route = require('./routes/router');
-/*
-//connect to mogodb
-//mongoose.connect('mongodb://localhost:27017/contacts')
+app.use(express.json());
 
-mongoose.connection.on('connected', ()=>{
+let courses = [
+{id:1, name:'course1'},
+{id:2, name:'course2'},
+{id:3, name:'course3'},
+{id:4, name:'course4'}
+];
 
-   console.log('connected to db'); 
-})
-const port = 3000;
+app.get('/', (req, res) =>{
+res.send('Hello Sudheer');
 
+});
+app.get('/api/courses', (req, res)=>{
+res.send(courses);
+});
 
+app.get('/api/courses/:id', (req, res)=>{
+let course = courses.find(c => c.id === parseInt(req.params.id));
+if(!course){
+    res.status(404).send('course not found');
+}else{
+    res.send(course.name);
+}
+});
 
-//calling middle ware
-app.use(cors());
+app.post('/api/courses', (req, res)=>{
+ //object distruction 
+ let {error} = validateCourse(req.body);
+ if(error){
+     res.status(400).send(error.details[0].message);
+     return;
+ }
+    let course = {
+        id: courses.length+1,
+        name: req.body.name
+    };
+    courses.push(course);
+    res.send(course);
+});
 
-//adding body-parser
-app.use(bodyparser.json());
+app.put('/api/courses/:id', (req, res)=>{
+    let course = courses.find(c => c.id === parseInt(req.params.id));
+    if(!course){
+        res.status(404).send('course not found');
+        return;
+    }
 
-//satic files
+  //  let result = validateCourse(req.body);
+   //object distruction 
+    let {error} = validateCourse(req.body);
+    if(error){
+        res.status(400).send(error.details[0].message);
+        return;
+    }
 
-app.use(express.static(path.join(__dirname, 'public')));
+    course.name=req.body.name;
+    res.send(course);
 
+});
 
+app.delete('/api/courses/:id', (req, res)=>{
+    let course = courses.find(c => c.id === parseInt(req.params.id));
+    if(!course){
+        res.status(404).send('course not found');
+        return;
+    }
 
-// calling router after /api
-app.use('/api', route);
+    // delete the course 
+    let index = courses.indexOf(course);
+    courses.splice(index,1);
 
-//testing server route
-app.get('/',(req, res)=>{
- res.send('hello');
+    res.send(course);
+
 });
 
 
-app.listen(port,()=>{
+let validateCourse = (course)=>{
+    let schema ={
+        name:Joi.string().min(3).required()
+    };
+    
+    let result = Joi.validate(course, schema);
+    return result;
+}
 
-    console.log(`server started at ${port}`);
+
+
+const port = process.env.port || 3000;
+app.listen(port, () =>{
+console.log(`listining at port ${port}`);
 });
-*/
-var xsum = () => {
-    var x = [1, 2, 3, 9]
-    console.log(x)
-    var x_total = 0;
-    for (var i = 0; i < x.length; i++) {
-      x_total = x_total + x[i];
-    }
-    return x_total;
-  };
-  
-  var ysum = () => {
-    var y = [1, 2, 4, 4]
-    var y_total = 0;
-  
-    for (var j = 0; j < y.length; j++) {
-      y_total = y_total + y[j];
-    }
-  
-    return y_total;
-  };
-  
-  var z = xsum;
-  console.log(xsum);
