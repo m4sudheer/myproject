@@ -17,3 +17,6 @@ package.json
     "dev" : "nodemon src/app.ts",
     "build" : "tsc -p ."
   },
+
+      
+      npm run dev
